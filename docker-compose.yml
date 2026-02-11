@@ -1,0 +1,58 @@
+services:
+  mongo:
+    image: mongo:7
+    container_name: cinefinder-mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  scraper:
+    build:
+      context: ./cinefinder_scraper
+    container_name: cinefinder-scraper
+    depends_on:
+      - mongo
+    volumes:
+      - ./data:/data
+    environment:
+      - PYTHONUNBUFFERED=1
+      - MAX_ITEMS=80
+      - MAX_PAGES=18
+      - SHUFFLE=1
+      - SAMPLE_RATE=1.0
+
+  loader:
+    build:
+      context: ./loader
+    container_name: cinefinder-loader
+    depends_on:
+      - mongo
+      - scraper
+    volumes:
+      - ./data:/data
+    environment:
+      - MONGO_HOST=mongo
+      - MONGO_PORT=27017
+      - MONGO_DB=cinefinder
+      - MONGO_COLLECTION=films
+      - JSON_PATH=/data/films.json
+      - WAIT_TIMEOUT=600
+
+  web:
+    build:
+      context: ./webapp
+    container_name: cinefinder-web
+    depends_on:
+      - mongo
+      - loader
+    ports:
+      - "5000:5000"
+    environment:
+      - MONGO_HOST=mongo
+      - MONGO_PORT=27017
+      - MONGO_DB=cinefinder
+      - MONGO_COLLECTION=films
+
+volumes:
+  mongo_data:

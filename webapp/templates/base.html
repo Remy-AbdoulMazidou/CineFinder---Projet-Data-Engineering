@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{% block title %}CineFinder{% endblock %}</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+  <header class="topbar">
+    <div class="topbar-inner topbar-centered">
+      <div class="brand-center">
+        <div class="brandline">
+          <span class="brand-dot"></span>
+          <div class="brand-title">CineFinder</div>
+          <span class="brand-dot brand-dot-right"></span>
+        </div>
+
+        <div class="brand-sub">Source : SensCritique</div>
+
+        <nav class="nav nav-centered">
+          <a class="nav-btn nav-home {% if request.endpoint == 'index' %}active{% endif %}"
+             href="{{ url_for('index') }}">
+            Accueil
+          </a>
+
+          <a class="nav-btn nav-stats {% if request.endpoint == 'stats' %}active{% endif %}"
+             href="{{ url_for('stats') }}">
+            Statistiques
+          </a>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="footer">
+    CineFinder — Rémy ABDOUL MAZIDOU & Antoine LI - DSIA (ESIEE Paris)
+  </footer>
+</body>
+</html>

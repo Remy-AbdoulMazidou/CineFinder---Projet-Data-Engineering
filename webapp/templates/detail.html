@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{{ film.get("title", "Film") }} - CinéFinder</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+  <main class="container detail-page">
+
+    <a class="back-link" href="{{ request.referrer or url_for('index') }}">
+      ← Retour à la liste des films
+    </a>
+
+    <section class="detail-card">
+      <!-- GAUCHE : affiche -->
+      <div class="detail-left">
+        {% if film.get("poster_url") %}
+          <img class="detail-poster" src="{{ film.get('poster_url') }}" alt="Affiche {{ film.get('title','film') }}">
+        {% else %}
+          <div class="detail-poster-placeholder">Pas d’affiche</div>
+        {% endif %}
+      </div>
+
+      <!-- DROITE : infos -->
+      <div class="detail-right">
+        <div>
+          <h1 class="detail-title">
+            {{ film.get("title", "Sans titre") }}
+            <span class="detail-year">({{ film.get("year") if film.get("year") else "—" }})</span>
+          </h1>
+        </div>
+
+        <div class="detail-badges">
+          <span class="badge badge-soft">
+            <span class="star">★</span>
+            {% if film.get("rating") is not none %}
+              {{ "%.1f"|format(film.get("rating")) }}/10
+            {% else %}
+              n/a
+            {% endif %}
+            {% if film.get("rating_count") %}
+              <span class="badge-muted">({{ film.get("rating_count") }} votes)</span>
+            {% endif %}
+          </span>
+
+          {% if film.get("duration_min") %}
+            <span class="badge">⏱ {{ film.get("duration_min") }} min</span>
+          {% endif %}
+
+          {% if film.get("genres") %}
+            {% for g in film.get("genres")[:3] %}
+              <span class="badge">{{ g }}</span>
+            {% endfor %}
+          {% endif %}
+        </div>
+
+        <div class="detail-lines">
+          <div class="line">
+            <div class="k">Réalisateur</div>
+            <div class="v">
+              {% if film.get("directors") and film.get("directors")|length > 0 %}
+                {{ film.get("directors")[0] }}
+              {% else %}
+                —
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="line">
+            <div class="k">Acteurs</div>
+            <div class="v">
+              {% if film.get("actors") and film.get("actors")|length > 0 %}
+                {{ film.get("actors")[:8] | join(", ") }}{% if film.get("actors")|length > 8 %}…{% endif %}
+              {% else %}
+                —
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        {% if film.get("description") %}
+          <div class="detail-synopsis">
+            <div class="k">Synopsis</div>
+            <p class="synopsis-text">{{ film.get("description") }}</p>
+          </div>
+        {% endif %}
+
+        <div class="detail-actions">
+          {% if film.get("url") %}
+            <a class="btn btn-wide" href="{{ film.get('url') }}" target="_blank" rel="noopener noreferrer">
+              Plus d’informations sur SensCritique
+            </a>
+          {% endif %}
+        </div>
+      </div>
+    </section>
+
+  </main>
+</body>
+</html>

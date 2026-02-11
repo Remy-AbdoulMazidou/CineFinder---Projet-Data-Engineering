@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+{% block title %}CineFinder{% endblock %}
+
+{% block content %}
+
+<!-- BARRE DE FILTRE -->
+<section class="filters" id="filters">
+  <form method="GET" id="filterForm">
+    <input type="hidden" name="sort" value="{{ sort }}">
+
+    <div class="filters-grid">
+      <div class="field">
+        <label for="title">Titre</label>
+        <input id="title" name="title" type="text" value="{{ title_query }}">
+      </div>
+
+      <div class="field">
+        <label for="director">Réalisateur</label>
+        <input id="director" name="director" type="text" value="{{ director_query }}">
+      </div>
+
+      <div class="field">
+        <label for="genre">Catégorie</label>
+        <select id="genre" name="genre">
+          <option value="">Toutes</option>
+          {% for g in genres %}
+            <option value="{{ g }}" {% if g == genre %}selected{% endif %}>{{ g }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="rating_min">Note minimale</label>
+        <select id="rating_min" name="rating_min">
+          <option value="">Aucune</option>
+          {% for n in range(0, 11) %}
+            <option value="{{ n }}" {% if rating_min == (n|string) %}selected{% endif %}>{{ n }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <button class="btn" type="submit">Filtrer</button>
+      <a class="btn btn-secondary" href="{{ url_for('index') }}">Réinitialiser</a>
+    </div>
+  </form>
+</section>
+
+<!-- TRI -->
+<section class="sortbar">
+  <form method="GET" id="sortForm">
+    <input type="hidden" name="title" value="{{ title_query }}">
+    <input type="hidden" name="director" value="{{ director_query }}">
+    <input type="hidden" name="genre" value="{{ genre }}">
+    <input type="hidden" name="rating_min" value="{{ rating_min }}">
+
+    <div class="sortrow">
+      <span class="sortlabel">Trier par</span>
+      <select name="sort" id="sortSelect">
+        <option value="year_desc" {% if sort == "year_desc" %}selected{% endif %}>Année récente</option>
+        <option value="year_asc" {% if sort == "year_asc" %}selected{% endif %}>Année ancienne</option>
+        <option value="rating_asc" {% if sort == "rating_asc" %}selected{% endif %}>Note (croissante)</option>
+        <option value="rating_desc" {% if sort == "rating_desc" %}selected{% endif %}>Note (décroissante)</option>
+        <option value="title_asc" {% if sort == "title_asc" %}selected{% endif %}>Titre (A → Z)</option>
+        <option value="title_desc" {% if sort == "title_desc" %}selected{% endif %}>Titre (Z → A)</option>
+      </select>
+
+      <div class="chip">
+        {{ films|length }} film(s)
+      </div>
+    </div>
+  </form>
+</section>
+
+<!-- CARTES -->
+<section class="grid" style="margin-top: 14px;">
+  {% for film in films %}
+    <div class="card">
+      {% if film.get("poster_url") %}
+        <img class="poster" src="{{ film.get('poster_url') }}" alt="Affiche {{ film.get('title','film') }}" loading="lazy">
+      {% else %}
+        <div class="poster-placeholder">Pas d’affiche</div>
+      {% endif %}
+
+      <div class="card-body">
+        <h3 class="title">{{ film.get("title", "Sans titre") }}</h3>
+
+        <div class="meta">
+          <span class="pill">{{ film.get("year") if film.get("year") else "—" }}</span>
+
+          <span class="rating">
+            <span class="star">★</span>
+            {% if film.get("rating") is not none %}
+              {{ "%.1f"|format(film.get("rating")) }}/10
+            {% else %}
+              n/a
+            {% endif %}
+          </span>
+
+          {% if film.get("duration_min") %}
+            <span>• {{ film.get("duration_min") }} min</span>
+          {% endif %}
+        </div>
+
+        <div class="small">
+          Réalisateur :
+          {% if film.get("directors") and film.get("directors")|length > 0 %}
+            {{ film.get("directors")[0] }}
+          {% else %}
+            —
+          {% endif %}
+        </div>
+
+        {% if film.get("genres") %}
+          <div class="tags">
+            {% for g in film.get("genres")[:2] %}
+              <span class="tag">{{ g }}</span>
+            {% endfor %}
+          </div>
+        {% endif %}
+
+        <div class="card-actions">
+          <a class="detail-btn" href="{{ url_for('film_detail', film_id=film['_id']) }}">Détail</a>
+        </div>
+      </div>
+    </div>
+  {% endfor %}
+</section>
+
+<script>
+  document.getElementById("sortSelect").addEventListener("change", function () {
+    document.getElementById("sortForm").submit();
+  });
+</script>
+
+{% endblock %}
